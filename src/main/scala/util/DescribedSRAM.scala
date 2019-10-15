@@ -14,6 +14,18 @@ import freechips.rocketchip.diplomaticobjectmodel.model.{OMSRAM, OMRTLModule}
 
 import scala.math.log10
 
+object DescribedSRAMIdAssigner {
+  private var nextId: Int = 0
+  def genId(): Int = this.synchronized {
+    /* FIXME: hardcoding to 0 until deduplication issues are fixed
+    val id = nextId
+    nextId += 1
+    id
+    */
+    0
+  }
+}
+
 object DescribedSRAM {
   def apply[T <: Data](
     name: String,
@@ -49,8 +61,8 @@ object DescribedSRAM {
       data_width = data.getWidth,
       depth = size,
       description = desc,
-      write_mask_granularity = granWidth
-    )
+      write_mask_granularity = granWidth,
+      uid = DescribedSRAMIdAssigner.genId())
 
     (mem, omSRAM)
   }
