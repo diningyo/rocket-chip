@@ -43,7 +43,7 @@ trait PWMTLModule extends HasRegMap {
   def params: PWMParams
 
   val w = params.beatBytes * 8
-  require(w <= 32)
+  //require(w <= 32)
 
   // How many clock cycles in a PWM cycle?
   val period = Reg(UInt(w.W))
@@ -58,12 +58,14 @@ trait PWMTLModule extends HasRegMap {
   base.io.duty := duty
   base.io.enable := enable
 
+  // BaseSubSystemをそのまま使うとwが64になるので
+  // メモリマップを変更した。
   regmap(
     0x00 -> Seq(
       RegField(w, period)),
-    0x04 -> Seq(
-      RegField(w, duty)),
     0x08 -> Seq(
+      RegField(w, duty)),
+    0x10 -> Seq(
       RegField(1, enable)))
 }
 
@@ -71,8 +73,8 @@ class PWMTL(c: PWMParams)(implicit p: Parameters)
   extends TLRegisterRouter(
     c.address, "pwm", Seq("ucbbar,pwm"),
     beatBytes = c.beatBytes)(
-    new TLRegBundle(c, _) with PWMTLBundle)(
-    new TLRegModule(c, _, _) with PWMTLModule)
+      new TLRegBundle(c, _) with PWMTLBundle)(
+      new TLRegModule(c, _, _) with PWMTLModule)
 
 trait HasPeripheryPWM  { this: BaseSubsystem =>
   implicit val p: Parameters
